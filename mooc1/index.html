@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+
+		<title>Cours en ligne deep learning: AutoEncodeur sur android</title>
+
+		<meta name="description" content="">
+		<meta name="author" content="Christophe Cerisara">
+
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <!-- <link rel="stylesheet" href="css/reset.css"> -->
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/3.6.0/css/reveal.min.css">
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/3.6.0/css/theme/black.min.css" id="theme">
+
+		<!-- Theme used for syntax highlighting of code -->
+        <!-- <link rel="stylesheet" href="lib/css/monokai.css"> -->
+
+		<!-- Printing and PDF exports 
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+        -->
+
+		<!--[if lt IE 9]>
+		<script src="lib/js/html5shiv.js"></script>
+		<![endif]-->
+
+        <!-- pour avoir des columns -->
+        <style>
+            .container{
+                display: flex;
+            }
+            .col{
+                flex: 1;
+            }
+        </style>
+    </head>
+
+    <body>
+
+        <div class="reveal">
+
+            <!-- Any section element inside of this container is displayed as a slide -->
+            <div class="slides">
+
+                <section data-markdown="src.md"
+                data-separator="^\r?\n---\r?\n$"
+                <!-- data-separator-vertical="^\r?\n\r?\n" -->
+                data-separator-notes="^Note:"
+                data-charset="utf-8">
+                <!--
+                Note that Windows uses `\r\n` instead of `\n` as its linefeed character.
+                For a regex that supports all operating systems, use `\r?\n` instead of `\n`.
+                -->
+                </section>
+
+            </div>
+
+        </div>
+
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/3.6.0/lib/js/head.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/3.6.0/js/reveal.min.js"></script>
+
+		<script>
+
+			// More info https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: true,
+				progress: true,
+				center: true,
+                hash: true,
+                slideNumber: true,
+
+                transition: 'slide', // none/fade/slide/convex/concave/zoom
+
+                math: {
+                    mathjax: 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js',
+                    config: 'TeX-AMS_HTML-full', // See http://docs.mathjax.org/en/latest/config-files.html
+                    // pass other options into `MathJax.Hub.Config()`
+                    TeX: { Macros: { RR: "{\\bf R}" } }
+                },
+
+                audio: {
+                    prefix: 'audio/', 	// audio files are stored in the "audio" folder
+                    suffix: '.ogg',		// audio files have the ".ogg" ending
+                    textToSpeechURL: null,  // the URL to the text to speech converter
+                    defaultNotes: false, 	// use slide notes as default for the text to speech converter
+                    defaultText: false, 	// use slide text as default for the text to speech converter
+                    advance: 0, 		// advance to next slide after given time in milliseconds after audio has played, use negative value to not advance 
+                    autoplay: false,	// automatically start slideshow
+                    defaultDuration: 5,	// default duration in seconds if no audio is available 
+                    defaultAudios: true,	// try to play audios with names such as audio/1.2.ogg
+                    playerOpacity: 0.05,	// opacity value of audio player if unfocused
+                    playerStyle: 'position: fixed; bottom: 4px; left: 25%; width: 50%; height:75px; z-index: 33;', // style used for container of audio controls 
+                    startAtFragment: false, // when moving to a slide, start at the current fragment or at the start of the slide
+                },
+
+                keyboard: {
+                    83: function() { 
+                            var indices = Reveal.getIndices();
+                            var id = "audioplayer-" + indices.h + "." + indices.v;
+                            if ( indices.f != undefined && indices.f >= 0 ) id = id + "." + indices.f;
+                            var recordedAudio = document.getElementById( id );
+                            if ( !recordedAudio ) { alert("Audio player is not found. Please check that audio-slideshow plugin is loaded!"); }
+                            recordedAudio.pause();
+                        },	// press 's' to stop audio
+
+                    80: function() { 
+                            var indices = Reveal.getIndices();
+                            var id = "audioplayer-" + indices.h + "." + indices.v;
+                            if ( indices.f != undefined && indices.f >= 0 ) id = id + "." + indices.f;
+                            var recordedAudio = document.getElementById( id );
+                            if ( !recordedAudio ) { alert("Audio player is not found. Please check that audio-slideshow plugin is loaded!"); }
+                            /*
+                            for (var m in recordedAudio) {
+                                if (typeof recordedAudio[m] == "function") {
+                                    console.log("method: " + recordedAudio[m]);
+                                }
+                            }
+                            */
+                            recordedAudio.play();
+                        },	// press 'p' to start audio
+                    82: function() { Recorder.toggleRecording(); },	// press 'r' to start/stop recording
+                    90: function() { Recorder.downloadZip(); }, 	// press 'z' to download zip containing audio files
+                    84: function() { Recorder.fetchTTS(); } 	// press 't' to fetch TTS audio files
+                },
+
+                // multiplex: {
+                    // Example values. To generate your own, see the socket.io server instructions.
+                //     secret: '15859818121628406762', // Obtained from the socket.io server. Gives this (the master) control of the presentation
+                //     id: 'e3307b2d20f570e9', // Obtained from socket.io server
+                //     url: 'https://reveal-js-multiplex-ccjbegmaii.now.sh' // Location of socket.io server
+                // },
+
+                // More info https://github.com/hakimel/reveal.js#dependencies
+                dependencies: [
+                    { src: 'https://cdnjs.cloudflare.com/ajax/libs/reveal.js/3.6.0/plugin/math/math.min.js', async: true },
+                    // { src: 'https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js', async: true },
+					// { src: 'plugin/multiplex/master.js', async: true },
+					{ src: 'https://cdn.jsdelivr.net/npm/marked/marked.min.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'https://cdnjs.cloudflare.com/ajax/libs/reveal.js/3.6.0/plugin/markdown/markdown.min.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'https://cdnjs.cloudflare.com/ajax/libs/reveal.js/3.6.0/plugin/highlight/highlight.min.js' },
+					// { src: 'plugin/search/search.js', async: true },
+					{ src: 'https://cdnjs.cloudflare.com/ajax/libs/reveal.js/3.6.0/plugin/zoom-js/zoom.min.js', async: true },
+                    { src: 'plugin/audio-slideshow/RecordRTC.js', condition: function( ) { return !!document.body.classList; } },
+                    { src: 'plugin/audio-slideshow/slideshow-recorder.js', condition: function( ) { return !!document.body.classList; } },
+                    { src: 'plugin/audio-slideshow/audio-slideshow.js', condition: function( ) { return !!document.body.classList; } },
+					{ src: 'https://cdnjs.cloudflare.com/ajax/libs/reveal.js/3.6.0/plugin/notes/notes.min.js', async: true }
+				]
+            });
+
+        </script>
+	</body>
+</html>
